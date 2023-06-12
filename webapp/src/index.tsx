@@ -1,13 +1,14 @@
-import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
+import App from './views/app/App';
 import reportWebVitals from './reportWebVitals';
+import { SessionProvider } from "@inrupt/solid-ui-react";
+
 
 ReactDOM.render(
-  <React.StrictMode>
+  <SessionProvider sessionId="idlogin">
     <App />
-  </React.StrictMode>,
+  </SessionProvider>,
   document.getElementById('root')
 );
 
