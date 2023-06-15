@@ -6,9 +6,11 @@ import {
 } from "@inrupt/solid-client";
 import { FOAF } from "@inrupt/vocab-common-rdf";
 import { fetch } from "@inrupt/solid-client-authn-browser";
-import { UserInSession } from "../customtypes";
+import { PointMarker, UserInSession } from "../customtypes";
 import { getDefaultSession, login, Session } from "@inrupt/solid-client-authn-browser";
 import { checkIsNotEmpty } from "./validator";
+
+const basePointMarkersURL : string = "/private/lomap_UO277369/points.json";
 
 async function goToPODLoginPage(session: Session, providerUrl: string): Promise<void> {
   if (!session.info.isLoggedIn) {
@@ -70,5 +72,40 @@ function getWebIdFromUrl(url: string): string {
   return webId;
 };
 
+const findAllUserPoints = async (webId: string): Promise<PointMarker[]> => {
+  const profileDocumentURI = encodeURI(getUserPrivatePointsUrl(webId));
 
-export { getPODUserProfileInfo, getUserProfile, goToPODLoginPage };
+  try {
+    const data = await fetch(profileDocumentURI, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    return parseJsonToPoint(await data.json());
+  } catch (err) {}
+  return new Array<PointMarker>();
+};
+const parseJsonToPoint = (inData: any): PointMarker[] => {
+  const newPoints: PointMarker[] = [];
+  const { points } = inData;
+
+  points.forEach((item: any) => {
+    const {
+      name,
+      lat,
+      lon
+    } = item;
+    let pointMarker:PointMarker = {name, lat, lon};
+    newPoints.push(pointMarker);
+  });
+
+  return newPoints;
+};
+const getUserPrivatePointsUrl = (myWedId?: string) => {
+  let webId: string = getDefaultSession().info.webId as string;
+  return constructPODUrl(myWedId ?? webId, basePointMarkersURL);
+};
+
+export { getPODUserProfileInfo, getUserProfile, goToPODLoginPage, findAllUserPoints };

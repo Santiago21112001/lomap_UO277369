@@ -5,3 +5,9 @@ export type UserInSession = {
   email?: string;
   friends?: string[];
 };
+
+export type PointMarker = {
+  name: string;
+  lat:number;
+  lon:number;
+};
