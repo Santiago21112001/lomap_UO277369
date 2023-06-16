@@ -29,7 +29,7 @@ function Map(): JSX.Element {
         {points.map((point: PointMarker) => {
               return (
                 <Marker
-                  key={point.name}
+                  key={point.id}
                   position={[
                     point.lat,
                     point.lon

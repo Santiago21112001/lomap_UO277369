@@ -4,6 +4,7 @@ import { getPODUserProfileInfo } from "../../logic/podManager";
 import { useState } from "react";
 import { UserInSession } from "../../customtypes";
 import Map from "../../components/map";
+import { Link } from "react-router-dom";
 
 function Home(): JSX.Element {
 
@@ -20,6 +21,9 @@ function Home(): JSX.Element {
 
   return (
     <Container maxWidth="sm" >
+      <nav>
+        <Link to="addPoint">Agregar punto</Link>
+      </nav>
       <Box component="h1" sx={{ py: 2 }}>
         Mapa.
       </Box>

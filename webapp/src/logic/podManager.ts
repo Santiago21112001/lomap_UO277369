@@ -9,6 +9,7 @@ import { fetch } from "@inrupt/solid-client-authn-browser";
 import { PointMarker, UserInSession } from "../customtypes";
 import { getDefaultSession, login, Session } from "@inrupt/solid-client-authn-browser";
 import { checkIsNotEmpty } from "./validator";
+import { overwriteFile, getSourceUrl } from "@inrupt/solid-client";
 
 const basePointMarkersURL : string = "/private/lomap_UO277369/points.json";
 
@@ -42,8 +43,49 @@ async function getPODUserProfileInfo(webId: string): Promise<UserInSession> {
   } as UserInSession;
 };
 
+const findAllUserPoints = async (webId: string): Promise<PointMarker[]> => {
+  const url = encodeURI(getUserPrivatePointsUrl(webId));
+
+  try {
+    const data = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    return parseJsonToPoint(await data.json());
+  } catch (err) {}
+  return new Array<PointMarker>();
+};
+
+async function addUserPoint(newPoint:PointMarker, webId: string, fetch:any) : Promise<void> {
+  const url = encodeURI(getUserPrivatePointsUrl(webId));
+  let userPoints:PointMarker[] = await findAllUserPoints(webId);
+  userPoints.push(newPoint);
+  let file = new Blob([JSON.stringify({ points: userPoints })],{type: "application/json",})
+  await writeFileToPod(file,url,fetch);
+}
+
 // ----------------------------
 // Métodos privados
+
+// Upload data as a file to the targetFileURL.
+// If the targetFileURL exists, overwrite the file.
+// If the targetFileURL does not exist, create the file at the location.
+async function writeFileToPod(filedata:any, targetFileURL: string, fetch:any): Promise<void> {
+  try {
+    const savedFile = await overwriteFile(  
+      targetFileURL,                   // URL for the file.
+      filedata,                        // Buffer containing file data
+      { contentType: "application/json", fetch: fetch } // mimetype if known, fetch from the authenticated session
+    );
+    console.log(`File saved at ${getSourceUrl(savedFile)}`);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 
 /**
  * Devuelve la URL del perfil de un usuario.
@@ -72,32 +114,18 @@ function getWebIdFromUrl(url: string): string {
   return webId;
 };
 
-const findAllUserPoints = async (webId: string): Promise<PointMarker[]> => {
-  const profileDocumentURI = encodeURI(getUserPrivatePointsUrl(webId));
-
-  try {
-    const data = await fetch(profileDocumentURI, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    return parseJsonToPoint(await data.json());
-  } catch (err) {}
-  return new Array<PointMarker>();
-};
 const parseJsonToPoint = (inData: any): PointMarker[] => {
   const newPoints: PointMarker[] = [];
   const { points } = inData;
 
   points.forEach((item: any) => {
     const {
+      id,
       name,
       lat,
       lon
     } = item;
-    let pointMarker:PointMarker = {name, lat, lon};
+    let pointMarker:PointMarker = {id, name, lat, lon};
     newPoints.push(pointMarker);
   });
 
@@ -108,4 +136,4 @@ const getUserPrivatePointsUrl = (myWedId?: string) => {
   return constructPODUrl(myWedId ?? webId, basePointMarkersURL);
 };
 
-export { getPODUserProfileInfo, getUserProfile, goToPODLoginPage, findAllUserPoints };
+export { getPODUserProfileInfo, getUserProfile, goToPODLoginPage, findAllUserPoints, addUserPoint };

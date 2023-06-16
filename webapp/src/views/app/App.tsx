@@ -5,6 +5,7 @@ import { useSession } from '@inrupt/solid-ui-react';
 import Error404Page from '../errorpage';
 import { useEffect, useState } from 'react';
 import LoginOrHome from '../LoginOrHome';
+import AddPointForm from '../addPoint/addPoint';
 
 function App() {
 	const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -56,6 +57,7 @@ function App() {
 		<BrowserRouter>
 			<Routes>
 				<Route index element={<LoginOrHome isLoggedIn={isLoggedIn} />}></Route>
+				<Route path="/addPoint" element={<AddPointForm></AddPointForm>}></Route>
 				<Route path="*" element={<Error404Page />} />
 			</Routes>
 		</BrowserRouter>

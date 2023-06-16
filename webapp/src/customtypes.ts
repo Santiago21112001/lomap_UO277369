@@ -7,6 +7,7 @@ export type UserInSession = {
 };
 
 export type PointMarker = {
+  id: string
   name: string;
   lat:number;
   lon:number;
