@@ -11,4 +11,12 @@ export type PointMarker = {
   name: string;
   lat:number;
   lon:number;
+  cat:string;
+  score:number;
+  comment:string;
+  image:string;
 };
+
+export type UserScore = {
+  addedPointMarkersScore:number;
+}

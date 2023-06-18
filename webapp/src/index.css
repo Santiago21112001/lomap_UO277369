@@ -16,3 +16,8 @@ code {
   width: 100wh; 
   height: 100vh;
 }
+
+.photo {
+  height: 10vh;
+  width: 10wh; 
+}

@@ -23,8 +23,8 @@ function PODForm(): JSX.Element {
         }}
         value={selectedOption}
       >
-        <option value="https://inrupt.net/" defaultValue={"https://inrupt.net/"}>https://inrupt.net/</option>
-        <option value='https://solidcommunity.net/' defaultValue={'https://solidcommunity.net/'}>https://solidcommunity.net/</option>
+        <option value="https://inrupt.net/" >https://inrupt.net/</option>
+        <option value='https://solidcommunity.net/' >https://solidcommunity.net/</option>
       </select>
       <button onClick={handleLogin}>login</button>
     </>

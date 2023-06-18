@@ -6,12 +6,13 @@ import {
 } from "@inrupt/solid-client";
 import { FOAF } from "@inrupt/vocab-common-rdf";
 import { fetch } from "@inrupt/solid-client-authn-browser";
-import { PointMarker, UserInSession } from "../customtypes";
+import { PointMarker, UserInSession, UserScore } from "../customtypes";
 import { getDefaultSession, login, Session } from "@inrupt/solid-client-authn-browser";
 import { checkIsNotEmpty } from "./validator";
 import { overwriteFile, getSourceUrl } from "@inrupt/solid-client";
 
-const basePointMarkersURL : string = "/private/lomap_UO277369/points.json";
+const basePointMarkersURL: string = "/private/lomap_UO277369/points.json";
+const baseUserScoreURL: string = "/private/lomap_UO277369/score.json";
 
 async function goToPODLoginPage(session: Session, providerUrl: string): Promise<void> {
   if (!session.info.isLoggedIn) {
@@ -55,27 +56,58 @@ const findAllUserPoints = async (webId: string): Promise<PointMarker[]> => {
     });
 
     return parseJsonToPoint(await data.json());
-  } catch (err) {}
+  } catch (err) { }
   return new Array<PointMarker>();
 };
 
-async function addUserPoint(newPoint:PointMarker, webId: string, fetch:any) : Promise<void> {
+async function addUserPoint(newPoint: PointMarker, webId: string, fetch: any): Promise<void> {
   const url = encodeURI(getUserPrivatePointsUrl(webId));
-  let userPoints:PointMarker[] = await findAllUserPoints(webId);
+  let userPoints: PointMarker[] = await findAllUserPoints(webId);
   userPoints.push(newPoint);
-  let file = new Blob([JSON.stringify({ points: userPoints })],{type: "application/json",})
-  await writeFileToPod(file,url,fetch);
+  let file = new Blob([JSON.stringify({ points: userPoints })], { type: "application/json", })
+  await writeFileToPod(file, url, fetch);
+  await addUserScore(5, webId, fetch);
 }
 
 // ----------------------------
 // Métodos privados
 
+function getUserScoreUrl(myWedId?: string): string {
+  let webId: string = getDefaultSession().info.webId as string;
+  return constructPODUrl(myWedId ?? webId, baseUserScoreURL);
+};
+async function addUserScore(scoreAdded: number, webId: string, fetch: any): Promise<void> {
+  const url = encodeURI(getUserScoreUrl(webId));
+  let userScore: UserScore = await getUserScoreFromPOD(webId);
+  userScore.addedPointMarkersScore += scoreAdded;
+  let file = new Blob([JSON.stringify(userScore)], { type: "application/json", })
+  await writeFileToPod(file, url, fetch);
+}
+
+async function getUserScoreFromPOD(webId: string): Promise<UserScore> {
+  const url = encodeURI(getUserScoreUrl(webId));
+  try {
+    const data = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    return parseJsonToScore(await data.json());
+  } catch (err) { }
+  return { addedPointMarkersScore: 0 };
+}
+function parseJsonToScore(inData: any): UserScore {
+  const { addedPointMarkersScore } = inData;
+  return { addedPointMarkersScore };
+}
 // Upload data as a file to the targetFileURL.
 // If the targetFileURL exists, overwrite the file.
 // If the targetFileURL does not exist, create the file at the location.
-async function writeFileToPod(filedata:any, targetFileURL: string, fetch:any): Promise<void> {
+async function writeFileToPod(filedata: any, targetFileURL: string, fetch: any): Promise<void> {
   try {
-    const savedFile = await overwriteFile(  
+    const savedFile = await overwriteFile(
       targetFileURL,                   // URL for the file.
       filedata,                        // Buffer containing file data
       { contentType: "application/json", fetch: fetch } // mimetype if known, fetch from the authenticated session
@@ -92,12 +124,12 @@ async function writeFileToPod(filedata:any, targetFileURL: string, fetch:any): P
  * @param myWedId WebId del usuario.
  * @returns
  */
-function getUserProfileUrl(myWedId?: string) : string {
+function getUserProfileUrl(myWedId?: string): string {
   let webId: string = getDefaultSession().info.webId as string;
   return constructPODUrl(myWedId ?? webId, "/profile/card");
 };
 
-function constructPODUrl(webId: string, path: string) : string {
+function constructPODUrl(webId: string, path: string): string {
   checkIsNotEmpty(webId);
   checkIsNotEmpty(path);
   return `https://${getWebIdFromUrl(webId)}${path}`;
@@ -123,9 +155,13 @@ const parseJsonToPoint = (inData: any): PointMarker[] => {
       id,
       name,
       lat,
-      lon
+      lon,
+      cat,
+      score,
+      comment,
+      image
     } = item;
-    let pointMarker:PointMarker = {id, name, lat, lon};
+    let pointMarker: PointMarker = { id, name, lat, lon, cat, score, comment, image };
     newPoints.push(pointMarker);
   });
 
@@ -136,4 +172,7 @@ const getUserPrivatePointsUrl = (myWedId?: string) => {
   return constructPODUrl(myWedId ?? webId, basePointMarkersURL);
 };
 
-export { getPODUserProfileInfo, getUserProfile, goToPODLoginPage, findAllUserPoints, addUserPoint };
+export { getPODUserProfileInfo, getUserProfile, goToPODLoginPage, findAllUserPoints, addUserPoint, getUserScoreFromPOD };
+
+
+
