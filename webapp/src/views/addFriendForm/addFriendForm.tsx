@@ -2,6 +2,7 @@ import { TextField } from "@mui/material";
 import { useState } from "react";
 import { addFriend } from "../../logic/friendsPodManager";
 import { useSession } from "@inrupt/solid-ui-react";
+import { Link } from "react-router-dom";
 
 function AddFriendForm(): JSX.Element {
 
@@ -13,19 +14,22 @@ function AddFriendForm(): JSX.Element {
       setMsg("ID vacío");
     } else {
       await addFriend(session.info.webId as string, friendWebId);
-      window.location.href = "/";
+      setMsg("Amigo agregado")
     }
   }
 
   return (
     <>
-      <>{msg}</>
+      <nav>
+        <Link to="/">Volver al mapa de puntos</Link>
+      </nav>  
       <TextField
         required
         label="ID de tu amigo"
         value={friendWebId}
         onChange={e => setFriendWebId(e.target.value)}
       />
+      <>{msg}</>
       <button onClick={(e) => { e.preventDefault(); handleSubmit(); }}>Agregar amigo</button>
     </>
   );

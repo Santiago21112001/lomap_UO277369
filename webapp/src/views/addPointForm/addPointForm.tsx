@@ -9,6 +9,7 @@ import MarkerToMove from "../../components/markerToMove";
 import CategoryOptions from "../../components/categorysOptions";
 import PointMarkerImage from "../../components/pointMarkerImage";
 import { addSharedPointForFriend, getAllFriends } from "../../logic/friendsPodManager";
+import { Link } from "react-router-dom";
 
 function AddPointForm(): JSX.Element {
 
@@ -51,7 +52,7 @@ function AddPointForm(): JSX.Element {
             friendsToShare.forEach(async (friendWebIdToShare) => {
                 await addSharedPointForFriend(p, session.fetch, friendWebIdToShare);
             });
-            //window.location.href = "/";
+            setMsg("Punto agregado");
         }
 
     }
@@ -83,8 +84,10 @@ function AddPointForm(): JSX.Element {
 
     return (
         <>
-            <FormControl>
-                <>{msg}</>
+            <nav>
+                <Link to="/">Volver al mapa de puntos</Link>
+            </nav>
+            <FormControl>      
                 <TextField
                     required
                     label="Name"
@@ -138,6 +141,7 @@ function AddPointForm(): JSX.Element {
                 })}
             </FormGroup>
             <button onClick={(e) => { handleSubmit(e); }}>Agregar punto</button>
+            <>{msg}</>
             <MapContainer id="mapContainer" center={[
                 latP,
                 lonP

@@ -6,8 +6,8 @@ import {
 } from "@inrupt/solid-client";
 import { FOAF } from "@inrupt/vocab-common-rdf";
 import { fetch } from "@inrupt/solid-client-authn-browser";
-import { PointMarker, UserInSession, UserScore } from "../customtypes";
-import { getDefaultSession, login, Session } from "@inrupt/solid-client-authn-browser";
+import { PointMarker, User, UserScore } from "../customtypes";
+import { getDefaultSession, Session } from "@inrupt/solid-client-authn-browser";
 import { checkIsNotEmpty } from "./validator";
 import { overwriteFile, getSourceUrl } from "@inrupt/solid-client";
 
@@ -16,12 +16,16 @@ const baseUserScoreURL: string = "/private/lomap_UO277369/score.json";
 
 async function goToPODLoginPage(session: Session, providerUrl: string): Promise<void> {
   if (!session.info.isLoggedIn) {
-    await login({
+    await session.login({
       oidcIssuer: encodeURI(providerUrl),
       redirectUrl: window.location.href,
       clientName: "lomap"
     })
   }
+}
+
+async function logoutFromPOD(session: Session): Promise<void> {
+  await session.logout();
 }
 
 async function getUserProfile(webId: string) {
@@ -34,14 +38,15 @@ async function getUserProfile(webId: string) {
  * Obtener la información del perfil del usuario en sesión.
  * @param webId
  */
-async function getPODUserProfileInfo(webId: string): Promise<UserInSession> {
+async function getPODUserProfileInfo(webId: string): Promise<User> {
   const profileUrl: string = getUserProfileUrl(webId) + "#me";
   const userDataset = await getSolidDataset(profileUrl, { fetch: fetch });
   const thing = getThing(userDataset, profileUrl) as Thing;
 
   return {
     name: getStringNoLocale(thing, FOAF.name),
-  } as UserInSession;
+    webId
+  } as User;
 };
 
 const findAllUserPoints = async (webId: string): Promise<PointMarker[]> => {
@@ -103,11 +108,11 @@ async function getUserScoreFromPOD(webId: string): Promise<UserScore> {
 
     return parseJsonToScore(await data.json());
   } catch (err) { }
-  return { addedPointMarkersScore: 0,sharedPointMarkersScore:0 };
+  return { addedPointMarkersScore: 0, sharedPointMarkersScore: 0 };
 }
 function parseJsonToScore(inData: any): UserScore {
-  const { addedPointMarkersScore,sharedPointMarkersScore } = inData;
-  return { addedPointMarkersScore,sharedPointMarkersScore };
+  const { addedPointMarkersScore, sharedPointMarkersScore } = inData;
+  return { addedPointMarkersScore, sharedPointMarkersScore };
 }
 // Upload data as a file to the targetFileURL.
 // If the targetFileURL exists, overwrite the file.
@@ -168,7 +173,7 @@ const parseJsonToPoint = (inData: any): PointMarker[] => {
       yours,
       friend
     } = item;
-    let pointMarker: PointMarker = { id, name, lat, lon, cat, score, comment, image,yours,friend };
+    let pointMarker: PointMarker = { id, name, lat, lon, cat, score, comment, image, yours, friend };
     newPoints.push(pointMarker);
   });
 
@@ -179,7 +184,7 @@ const getUserPrivatePointsUrl = (myWedId?: string) => {
   return constructPODUrl(myWedId ?? webId, basePointMarkersURL);
 };
 
-export { addSharedPointsUserScore, getPODUserProfileInfo, getUserProfile, goToPODLoginPage, findAllUserPoints, addUserPoint, getUserScoreFromPOD,getUserProfileUrl, getWebIdFromUrl, parseJsonToPoint, writeFileToPod,constructPODUrl };
+export { addSharedPointsUserScore, getPODUserProfileInfo, getUserProfile, goToPODLoginPage, findAllUserPoints, addUserPoint, getUserScoreFromPOD, getUserProfileUrl, getWebIdFromUrl, parseJsonToPoint, writeFileToPod, constructPODUrl, logoutFromPOD };
 
 
 

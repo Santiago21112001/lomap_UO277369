@@ -1,5 +1,5 @@
-export type UserInSession = {
-  webId?: string;
+export type User = {
+  webId: string;
   name: string;
 };
 
