@@ -83,6 +83,13 @@ async function addUserScore(scoreAdded: number, webId: string, fetch: any): Prom
   let file = new Blob([JSON.stringify(userScore)], { type: "application/json", })
   await writeFileToPod(file, url, fetch);
 }
+async function addSharedPointsUserScore(scoreAdded: number, webId: string, fetch: any): Promise<void> {
+  const url = encodeURI(getUserScoreUrl(webId));
+  let userScore: UserScore = await getUserScoreFromPOD(webId);
+  userScore.sharedPointMarkersScore += scoreAdded;
+  let file = new Blob([JSON.stringify(userScore)], { type: "application/json", })
+  await writeFileToPod(file, url, fetch);
+}
 
 async function getUserScoreFromPOD(webId: string): Promise<UserScore> {
   const url = encodeURI(getUserScoreUrl(webId));
@@ -96,16 +103,16 @@ async function getUserScoreFromPOD(webId: string): Promise<UserScore> {
 
     return parseJsonToScore(await data.json());
   } catch (err) { }
-  return { addedPointMarkersScore: 0 };
+  return { addedPointMarkersScore: 0,sharedPointMarkersScore:0 };
 }
 function parseJsonToScore(inData: any): UserScore {
-  const { addedPointMarkersScore } = inData;
-  return { addedPointMarkersScore };
+  const { addedPointMarkersScore,sharedPointMarkersScore } = inData;
+  return { addedPointMarkersScore,sharedPointMarkersScore };
 }
 // Upload data as a file to the targetFileURL.
 // If the targetFileURL exists, overwrite the file.
 // If the targetFileURL does not exist, create the file at the location.
-async function writeFileToPod(filedata: any, targetFileURL: string, fetch: any): Promise<void> {
+async function writeFileToPod(filedata: Blob, targetFileURL: string, fetch: any): Promise<void> {
   try {
     const savedFile = await overwriteFile(
       targetFileURL,                   // URL for the file.
@@ -136,10 +143,8 @@ function constructPODUrl(webId: string, path: string): string {
 };
 
 /**
- * Formato de entrada: https://<webId>/profile/card#me
- * Formato de salida: <webId>
- * @param url
- * @returns
+ * @param url https://webId/profile/card#me
+ * @returns webId
  */
 function getWebIdFromUrl(url: string): string {
   const webId = url.split("/")[2];
@@ -159,9 +164,11 @@ const parseJsonToPoint = (inData: any): PointMarker[] => {
       cat,
       score,
       comment,
-      image
+      image,
+      yours,
+      friend
     } = item;
-    let pointMarker: PointMarker = { id, name, lat, lon, cat, score, comment, image };
+    let pointMarker: PointMarker = { id, name, lat, lon, cat, score, comment, image,yours,friend };
     newPoints.push(pointMarker);
   });
 
@@ -172,7 +179,7 @@ const getUserPrivatePointsUrl = (myWedId?: string) => {
   return constructPODUrl(myWedId ?? webId, basePointMarkersURL);
 };
 
-export { getPODUserProfileInfo, getUserProfile, goToPODLoginPage, findAllUserPoints, addUserPoint, getUserScoreFromPOD };
+export { addSharedPointsUserScore, getPODUserProfileInfo, getUserProfile, goToPODLoginPage, findAllUserPoints, addUserPoint, getUserScoreFromPOD,getUserProfileUrl, getWebIdFromUrl, parseJsonToPoint, writeFileToPod,constructPODUrl };
 
 
 

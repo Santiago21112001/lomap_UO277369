@@ -1,9 +1,6 @@
 export type UserInSession = {
   webId?: string;
   name: string;
-  imageUrl?: string;
-  email?: string;
-  friends?: string[];
 };
 
 export type PointMarker = {
@@ -15,8 +12,16 @@ export type PointMarker = {
   score:number;
   comment:string;
   image:string;
+  yours:boolean;
+  friend?:Friend
 };
 
 export type UserScore = {
   addedPointMarkersScore:number;
-}
+  sharedPointMarkersScore:number;
+};
+
+export type Friend = {
+  webId : string;
+  name : string;
+};

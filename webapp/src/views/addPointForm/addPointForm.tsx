@@ -1,13 +1,14 @@
 import { useSession } from "@inrupt/solid-ui-react";
-import { FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, TextField } from "@mui/material";
-import { useState } from "react";
+import { FormControl, FormControlLabel, FormGroup, FormLabel, Radio, RadioGroup, TextField } from "@mui/material";
+import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from 'uuid';
 import { addUserPoint } from "../../logic/podManager";
-import { PointMarker } from "../../customtypes";
+import { Friend, PointMarker } from "../../customtypes";
 import { MapContainer, TileLayer } from "react-leaflet";
 import MarkerToMove from "../../components/markerToMove";
 import CategoryOptions from "../../components/categorysOptions";
 import PointMarkerImage from "../../components/pointMarkerImage";
+import { addSharedPointForFriend, getAllFriends } from "../../logic/friendsPodManager";
 
 function AddPointForm(): JSX.Element {
 
@@ -21,15 +22,21 @@ function AddPointForm(): JSX.Element {
     const [comment, setComment] = useState<string>('');
     const [image, setImage] = useState<string>("Sin imagen");
     const [msg, setMsg] = useState<string>('');
+    const [friends, setFriends] = useState<Friend[]>([]);
+    const [friendsToShare, setFriendsToShare] = useState<Friend[]>([]);
 
+    useEffect(() => {
+        async function loadFriends() {
+            setFriends(await getAllFriends(session.info.webId as string));
+        }
+        loadFriends();
+    }, [session.info.webId])
 
     const handleRadioButtonChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setImage((event.target as HTMLInputElement).value);
     };
 
-    async function addPoint(lat: number, lon: number): Promise<void> {
-        let uuid: string = uuidv4();
-        let p: PointMarker = { id: uuid, name: nameP, lat, lon, cat, score, comment,image }
+    async function addPoint(p:PointMarker): Promise<void> {
         await addUserPoint(p, session.info.webId as string, session.fetch);
     }
 
@@ -38,10 +45,34 @@ function AddPointForm(): JSX.Element {
         if (nameP.trimEnd().length === 0) {
             setMsg("Nombre vacío");
         } else {
-            await addPoint(latP, lonP);
-            window.location.href = "/";
+            let uuid: string = uuidv4();
+            let p: PointMarker = { id: uuid, name: nameP, lat:latP, lon:lonP, cat, score, comment, image,yours:true }
+            await addPoint(p);
+            friendsToShare.forEach(async (friendWebIdToShare) => {
+                await addSharedPointForFriend(p, session.fetch, friendWebIdToShare);
+            });
+            //window.location.href = "/";
         }
 
+    }
+    async function handleCheckBoxChange(e: React.ChangeEvent<HTMLInputElement>, friend:Friend): Promise<void> {
+        if(e.target.checked) {
+            addFriendToShare(friend);
+        } else {
+            removeFriendToShare(friend);
+        }
+    }
+
+    function addFriendToShare(friendToAdd: Friend) {
+        if (!checkFriendToShareNotOnList(friendToAdd)) {
+            setFriendsToShare([...friendsToShare, friendToAdd]);
+        }
+    }
+    function removeFriendToShare(friendToRemove: Friend) {
+        setFriendsToShare(friendsToShare.filter((friendToShare) => friendToShare.webId !== friendToRemove.webId));
+    }
+    function checkFriendToShareNotOnList(friendToCheck: Friend) {
+        return friendsToShare.some((friendWebIdToShare) => friendWebIdToShare.webId === friendToCheck.webId);
     }
 
     const callback = async (lat: number, lon: number) => {
@@ -93,7 +124,20 @@ function AddPointForm(): JSX.Element {
                     <PointMarkerImage imageName="paisaje"></PointMarkerImage>
                 </RadioGroup>
             </FormControl>
-            <button onClick={(e) => { e.preventDefault(); handleSubmit(e); }}>Agregar punto</button>
+            <p>Amigos con los que compartir tu punto</p>
+
+            <FormGroup>
+                {friends.map(friend => {
+                    return (<><label key={uuidv4()} htmlFor="checkbox">{friend.name}</label>
+                    <input key={uuidv4()}
+                    type="checkbox"
+                    onChange={ (e) => {handleCheckBoxChange(e, friend)}}
+                    id="checkbox"
+                    /></>);
+
+                })}
+            </FormGroup>
+            <button onClick={(e) => { handleSubmit(e); }}>Agregar punto</button>
             <MapContainer id="mapContainer" center={[
                 latP,
                 lonP
