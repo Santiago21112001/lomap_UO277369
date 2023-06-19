@@ -7,6 +7,8 @@ import { useEffect, useState } from 'react';
 import LoginOrHome from '../LoginOrHome';
 import AddPointForm from '../addPointForm/addPointForm';
 import AddFriend from '../addFriendForm/addFriendForm';
+import ManagePrivatePoints from '../managePrivatePoints/managePrivatePoints';
+import ManageSharedPoints from '../manageSharedPoints/manageSharedPoints';
 
 function App() {
 	const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -60,6 +62,8 @@ function App() {
 				<Route index element={<LoginOrHome isLoggedIn={isLoggedIn} />}></Route>
 				<Route path="/addPoint" element={<AddPointForm></AddPointForm>}></Route>
 				<Route path="/addFriend" element={<AddFriend></AddFriend>}></Route>
+				<Route path="/sharePoints" element={<ManagePrivatePoints></ManagePrivatePoints>}></Route>
+				<Route path="/unsharePoints" element={<ManageSharedPoints></ManageSharedPoints>}></Route>
 				<Route path="*" element={<Error404Page />} />
 			</Routes>
 		</BrowserRouter>

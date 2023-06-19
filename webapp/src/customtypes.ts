@@ -13,7 +13,8 @@ export type PointMarker = {
   comment:string;
   image:string;
   yours:boolean;
-  friend?:Friend
+  friend?:Friend;
+  sharedWith:Friend[];
 };
 
 export type UserScore = {

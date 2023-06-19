@@ -37,6 +37,8 @@ function Home(): JSX.Element {
       <nav>
         <Link to="addPoint">Agregar punto</Link><br></br>
         <Link to="addFriend">Agregar amigo</Link>
+        <Link to="sharePoints">Compartir tus puntos con amigos</Link>
+        <Link to="unsharePoints">Dejar de compartir tus puntos con amigos</Link>
       </nav>
       <button onClick={logout}>Salir de sesión</button>
       <Box component="h1" sx={{ py: 2 }}>

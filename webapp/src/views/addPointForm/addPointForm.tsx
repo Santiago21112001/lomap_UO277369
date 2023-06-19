@@ -47,8 +47,9 @@ function AddPointForm(): JSX.Element {
             setMsg("Nombre vacío");
         } else {
             let uuid: string = uuidv4();
-            let p: PointMarker = { id: uuid, name: nameP, lat:latP, lon:lonP, cat, score, comment, image,yours:true }
+            let p: PointMarker = { id: uuid, name: nameP, lat:latP, lon:lonP, cat, score, comment, image,yours:true,sharedWith:friendsToShare }
             await addPoint(p);
+            p.sharedWith=[];
             friendsToShare.forEach(async (friendWebIdToShare) => {
                 await addSharedPointForFriend(p, session.fetch, friendWebIdToShare);
             });

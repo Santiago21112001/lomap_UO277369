@@ -6,7 +6,8 @@ import {
     getThing,
     getUrlAll,
     saveSolidDatasetAt,
-    setThing} from "@inrupt/solid-client";
+    setThing
+} from "@inrupt/solid-client";
 import { Friend, PointMarker } from "../customtypes"
 import { addSharedPointsUserScore, constructPODUrl, getPODUserProfileInfo, getUserProfile, getUserProfileUrl, parseJsonToPoint, writeFileToPod } from "./podManager";
 import { fetch, getDefaultSession } from "@inrupt/solid-client-authn-browser";
@@ -84,14 +85,6 @@ async function getAllFriends(webId: string): Promise<Friend[]> {
     return myFriendsList;
 }
 
-/**
- * Añade el punto a compartir a la carpeta private/sharedpoints/<username> del usuario.
- * <username> es el nombre de usuario del amigo con el que se quiere compartir el punto.
- * @param point Punto que se quiere compartir con el amigo
- * @param session Sesión del usuario logeado en la aplicación
- * @param friend Amigo con el que se quiere compartir el punto dado.
- * @returns 
- */
 async function addSharedPointForFriend(newPoint: PointMarker,
     fetch: any,
     friend: Friend) {
@@ -106,7 +99,6 @@ async function addSharedPointForFriend(newPoint: PointMarker,
     let file = new Blob([JSON.stringify({ points: userPoints })], { type: "application/json", });
     await writeFileToPod(file, url, fetch);
     await addSharedPointsUserScore(10, webId, fetch);
-    //await allowReadingToFriend(webId, friend,fetch);
 }
 
 const findAllSharedUserPoints = async (url: string): Promise<PointMarker[]> => {
@@ -131,7 +123,7 @@ function getUserSharedPointsUrl(myWedId: string, friendName: string) {
  * @param session Sesion del usuario logeado.
  * @returns Array con los puntos compartidos
  */
-async function findAllSharedPointsByFriends(session: any):Promise<PointMarker[]> {
+async function findAllSharedPointsByFriends(session: any): Promise<PointMarker[]> {
     const userFriends = await getAllFriends(session.info.webId);
     let totalPoints: PointMarker[] = [];
     for (let i = 0; i < userFriends.length; i++) {
@@ -140,10 +132,10 @@ async function findAllSharedPointsByFriends(session: any):Promise<PointMarker[]>
     }
     return totalPoints;
 }
-  
-  async function findSharedPointsByFriend(session: any, friend: Friend):Promise<PointMarker[]> {
-    const myUserName:string=(await getPODUserProfileInfo(session.info.webId)).name;
-    const friendDocumentURI = encodeURI(getUserSharedPointsUrl(friend.webId,myUserName));
+
+async function findSharedPointsByFriend(session: any, friend: Friend): Promise<PointMarker[]> {
+    const myUserName: string = (await getPODUserProfileInfo(session.info.webId)).name;
+    const friendDocumentURI = encodeURI(getUserSharedPointsUrl(friend.webId, myUserName));
     try {
         const data = await session.fetch(friendDocumentURI, {
             method: "GET",
@@ -158,7 +150,12 @@ async function findAllSharedPointsByFriends(session: any):Promise<PointMarker[]>
     }
     return new Array<PointMarker>();
 }
-  
+async function removeSharedPointsForFriend(fetch: (input: RequestInfo | URL, init?: RequestInit | undefined) => Promise<Response>, friend: Friend) {
+    let webId: string = getDefaultSession().info.webId as string;
+    const url = encodeURI(getUserSharedPointsUrl(webId, friend.name));
+    let file = new Blob([JSON.stringify({ points: [] })], { type: "application/json", });
+    await writeFileToPod(file, url, fetch);
+}
 // ------------------
 // Métodos privados
 function constructWebIdFromUsername(userName: string): string {
@@ -185,6 +182,6 @@ function checkIfExistsFriend(userProfile: any, friendUsername: string): boolean 
     return false;
 };
 
-export { addFriend, getAllFriends, addSharedPointForFriend,findAllSharedPointsByFriends };
+export { addFriend, getAllFriends, addSharedPointForFriend, findAllSharedPointsByFriends, removeSharedPointsForFriend};
 
 

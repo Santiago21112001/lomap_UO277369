@@ -171,9 +171,10 @@ const parseJsonToPoint = (inData: any): PointMarker[] => {
       comment,
       image,
       yours,
-      friend
+      friend,
+      sharedWith
     } = item;
-    let pointMarker: PointMarker = { id, name, lat, lon, cat, score, comment, image, yours, friend };
+    let pointMarker: PointMarker = { id, name, lat, lon, cat, score, comment, image, yours, friend,sharedWith };
     newPoints.push(pointMarker);
   });
 

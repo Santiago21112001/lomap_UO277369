@@ -3,7 +3,7 @@ import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import 'leaflet/dist/leaflet.css';
 import { findAllUserPoints } from "../logic/podManager";
 import { PointMarker } from "../customtypes";
-import { ChangeEvent, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSession } from "@inrupt/solid-ui-react";
 import PointMarkerImage from "./pointMarkerImage";
 import { findAllSharedPointsByFriends } from "../logic/friendsPodManager";
@@ -26,7 +26,7 @@ function Map(): JSX.Element {
       setPoints(data);
     };
     loadPoints();
-  }, [session.info.webId]);
+  }, [session]);
   async function filter() {
     if (cat === "Sin filtro")
       setPoints(allPoints);
@@ -113,7 +113,7 @@ function Map(): JSX.Element {
                 Categoría: {point.cat}<br></br>
                 Puntuación: {point.score}<br></br>
                 Comentario: {point.comment}<br></br>
-                {!point.yours? 'Foto de tu amigo '+point.friend?.name:''}<br></br>
+                {!point.yours? 'Punto de tu amigo '+point.friend?.name:''}<br></br>
                 <PointMarkerImage imageName={point.image}></PointMarkerImage>
               </Popup>
             </Marker>
