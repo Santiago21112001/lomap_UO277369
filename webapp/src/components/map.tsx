@@ -1,4 +1,4 @@
-import { LatLngExpression } from "leaflet";
+import { LatLngExpression, icon } from "leaflet";
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import 'leaflet/dist/leaflet.css';
 import { findAllUserPoints } from "../logic/podManager";
@@ -7,6 +7,8 @@ import { useEffect, useState } from 'react';
 import { useSession } from "@inrupt/solid-ui-react";
 import PointMarkerImage from "./pointMarkerImage";
 import { findAllSharedPointsByFriends } from "../logic/friendsPodManager";
+import { Button, InputLabel, MenuItem, Select } from "@mui/material";
+import pointMarkerIcon from "../pointMarker.svg"
 
 function Map(): JSX.Element {
 
@@ -15,7 +17,6 @@ function Map(): JSX.Element {
   const [points, setPoints] = useState<PointMarker[]>([]);
   const [allPoints, setAllPoints] = useState<PointMarker[]>([]);
   const [cat, setCat] = useState<string>('Sin categoría');
-  const [selectedOption, setSelectedOption] = useState('');
   const [selectedOptionFriend, setSelectedOptionFriend] = useState<number>(1);
 
   useEffect(() => {
@@ -41,59 +42,59 @@ function Map(): JSX.Element {
   }
 
   async function filterByOwner() {
-    if(selectedOptionFriend===1){
+    if (selectedOptionFriend === 1) {
       setPoints(allPoints);
-    } else if(selectedOptionFriend===2){
+    } else if (selectedOptionFriend === 2) {
       let result: PointMarker[] = [];
       allPoints.forEach(pointMarker => {
         if (pointMarker.yours)
           result.push(pointMarker);
       });
       setPoints(result);
-    } else if(selectedOptionFriend===3){
+    } else if (selectedOptionFriend === 3) {
       let result: PointMarker[] = [];
       allPoints.forEach(pointMarker => {
         if (!pointMarker.yours)
           result.push(pointMarker);
       });
       setPoints(result);
-    } 
+    }
   }
 
   return (
     <>
-    <p>Filtrar en base a categoría</p>
-      <select
-        onChange={(e) => {
-          setSelectedOption(e.currentTarget.value);
-          setCat(e.target.value);
-        }}
-        value={selectedOption}
-      >
-        <option value='Sin categoría' >Sin categoría</option>
-        <option value="Restaurante" >Restaurante</option>
-        <option value='Bar' >Bar</option>
-        <option value='Tienda' >Tienda</option>
-        <option value='Paisaje' >Paisaje</option>
-        <option value='Monumento' >Monumento</option>
-        <option value='Sin filtro' >Sin filtro</option>
-
-      </select>
-      <button onClick={(e) => { e.preventDefault(); filter(); }}>Filtrar</button>
-      <p>Filtrar en base a propietario</p>
-      <select
-        onChange={(e) => {
-          setSelectedOptionFriend(Number(e.currentTarget.value));
-        }}
-        value={selectedOptionFriend}
-      >
-        <option value={1} >Tus puntos y los de tus amigos</option>
-        <option value={2} >Sólo tus puntos</option>
-        <option value={3} >Sólo los de tus amigos</option>
-
-      </select>
-      <button onClick={(e) => { e.preventDefault(); filterByOwner(); }}>Filtrar</button>
-
+      
+        <InputLabel id="select-filter-category-label">Filtrar en base a categoría</InputLabel>
+        <Select
+          labelId="select-filter-category-label"
+          value={cat}
+          onChange={(e) => {
+            setCat(e.target.value);
+          }}
+        >
+          <MenuItem value='Sin categoría' >Sin categoría</MenuItem>
+          <MenuItem value="Restaurante" >Restaurante</MenuItem>
+          <MenuItem value='Bar' >Bar</MenuItem>
+          <MenuItem value='Tienda' >Tienda</MenuItem>
+          <MenuItem value='Paisaje' >Paisaje</MenuItem>
+          <MenuItem value='Monumento' >Monumento</MenuItem>
+          <MenuItem value='Sin filtro' >Sin filtro</MenuItem>
+        </Select>
+        <Button onClick={(e) => { e.preventDefault(); filter(); }} variant='contained' color='primary'>Filtrar</Button>
+        <InputLabel id="label">Filtrar en base a propietario</InputLabel>
+        <Select
+          labelId="label"
+          value={selectedOptionFriend}
+          onChange={(e) => {
+            setSelectedOptionFriend(Number(e.target.value));
+          }}
+        >
+          <MenuItem value={1} >Tus puntos y los de tus amigos</MenuItem>
+          <MenuItem value={2} >Sólo tus puntos</MenuItem>
+          <MenuItem value={3} >Sólo los de tus amigos</MenuItem>
+        </Select>
+        <Button onClick={(e) => { e.preventDefault(); filterByOwner(); }} variant='contained' color='primary'>Filtrar</Button>
+      
       <MapContainer id="mapContainer" center={position} zoom={13} scrollWheelZoom={false}>
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -102,6 +103,11 @@ function Map(): JSX.Element {
         {points.map((point: PointMarker) => {
           return (
             <Marker
+            icon={icon({
+              iconUrl: pointMarkerIcon,
+              iconSize: [50, 50],
+              iconAnchor: [50, 50],
+            })}
               key={point.id}
               position={[
                 point.lat,
@@ -113,7 +119,7 @@ function Map(): JSX.Element {
                 Categoría: {point.cat}<br></br>
                 Puntuación: {point.score}<br></br>
                 Comentario: {point.comment}<br></br>
-                {!point.yours? 'Punto de tu amigo '+point.friend?.name:''}<br></br>
+                {!point.yours ? 'Punto de tu amigo ' + point.friend?.name : ''}<br></br>
                 <PointMarkerImage imageName={point.image}></PointMarkerImage>
               </Popup>
             </Marker>

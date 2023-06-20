@@ -4,9 +4,11 @@ import App from './views/app/App';
 import reportWebVitals from './reportWebVitals';
 import { SessionProvider } from "@inrupt/solid-ui-react";
 
+import CssBaseline from '@mui/material/CssBaseline';
 
 ReactDOM.render(
   <SessionProvider sessionId="idlogin">
+    <CssBaseline />
     <App />
   </SessionProvider>,
   document.getElementById('root')

@@ -1,6 +1,7 @@
 import { Marker } from "react-leaflet"
 import { useState, useRef } from "react"
-
+import { icon } from "leaflet";
+import pointMarkerIcon from "../pointMarker.svg"
 
   function MarkerToMove(props:{callback:(lat:number,lon:number) =>void}) {
     const center = {
@@ -21,7 +22,9 @@ import { useState, useRef } from "react"
   
     return (
       <Marker
+      
         draggable={draggable}
+        
         eventHandlers={{ drag: onDrag }}
         position={position}
         ref={markerRef}>

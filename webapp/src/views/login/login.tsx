@@ -5,7 +5,7 @@ function Login(): JSX.Element {
   return (
     <>
       <Container maxWidth="sm">
-        <Box component="h1" sx={{ py: 2 }}>Login.</Box>
+        <Box component="h1" sx={{ py: 2 }}>Iniciar sesión.</Box>
         <PODForm />
       </Container>
     </>

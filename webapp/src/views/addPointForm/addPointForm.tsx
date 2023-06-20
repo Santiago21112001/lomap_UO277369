@@ -1,12 +1,11 @@
 import { useSession } from "@inrupt/solid-ui-react";
-import { FormControl, FormControlLabel, FormGroup, FormLabel, Radio, RadioGroup, TextField } from "@mui/material";
+import { Box, Button, FormControl, FormControlLabel, FormGroup, FormLabel, InputLabel, MenuItem, Radio, RadioGroup, Select, TextField } from "@mui/material";
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from 'uuid';
 import { addUserPoint } from "../../logic/podManager";
 import { Friend, PointMarker } from "../../customtypes";
 import { MapContainer, TileLayer } from "react-leaflet";
 import MarkerToMove from "../../components/markerToMove";
-import CategoryOptions from "../../components/categorysOptions";
 import PointMarkerImage from "../../components/pointMarkerImage";
 import { addSharedPointForFriend, getAllFriends } from "../../logic/friendsPodManager";
 import { Link } from "react-router-dom";
@@ -37,7 +36,7 @@ function AddPointForm(): JSX.Element {
         setImage((event.target as HTMLInputElement).value);
     };
 
-    async function addPoint(p:PointMarker): Promise<void> {
+    async function addPoint(p: PointMarker): Promise<void> {
         await addUserPoint(p, session.info.webId as string, session.fetch);
     }
 
@@ -47,9 +46,15 @@ function AddPointForm(): JSX.Element {
             setMsg("Nombre vacío");
         } else {
             let uuid: string = uuidv4();
-            let p: PointMarker = { id: uuid, name: nameP, lat:latP, lon:lonP, cat, score, comment, image,yours:true,sharedWith:friendsToShare }
+            if(score<0) {
+                setScore(0);
+            }
+            if(score>10) {
+                setScore(10);
+            }
+            let p: PointMarker = { id: uuid, name: nameP, lat: latP, lon: lonP, cat, score, comment, image, yours: true, sharedWith: friendsToShare }
             await addPoint(p);
-            p.sharedWith=[];
+            p.sharedWith = [];
             friendsToShare.forEach(async (friendWebIdToShare) => {
                 await addSharedPointForFriend(p, session.fetch, friendWebIdToShare);
             });
@@ -57,8 +62,8 @@ function AddPointForm(): JSX.Element {
         }
 
     }
-    async function handleCheckBoxChange(e: React.ChangeEvent<HTMLInputElement>, friend:Friend): Promise<void> {
-        if(e.target.checked) {
+    async function handleCheckBoxChange(e: React.ChangeEvent<HTMLInputElement>, friend: Friend): Promise<void> {
+        if (e.target.checked) {
             addFriendToShare(friend);
         } else {
             removeFriendToShare(friend);
@@ -88,25 +93,35 @@ function AddPointForm(): JSX.Element {
             <nav>
                 <Link to="/">Volver al mapa de puntos</Link>
             </nav>
-            <FormControl>      
+            <Box component="h1">Añadir punto</Box>
+            <Box component="h2">Introduce los datos y luego arrastra el marcador del mapa para elegir la posición de tu nuevo punto</Box>
                 <TextField
                     required
                     label="Name"
                     value={nameP}
                     onChange={e => setName(e.target.value)}
                 />
-                <div>{latP}</div>
-                <div>{lonP}</div>
-                <select
+                <Box component="div">Latitud: {latP}</Box>
+                <Box component="div">Longitud: {lonP}</Box>
+                <FormControl>
+                <InputLabel id="select-filter-category-label">Filtrar en base a categoría</InputLabel>
+                <Select
+                    labelId="select-filter-category-label"
+                    label="Filtrar en base a categoría"
+                    value={cat}
                     onChange={(e) => {
-                        setSelectedOption(e.currentTarget.value);
                         setCat(e.target.value);
                     }}
-                    value={selectedOption}
                 >
-                    <CategoryOptions></CategoryOptions>
-                </select>
-                <input type="number" value={score} onChange={(e) => { setScore(Number(e.target.value)) }}></input>
+                    <MenuItem value='Sin categoría' >Sin categoría</MenuItem>
+                    <MenuItem value="Restaurante" >Restaurante</MenuItem>
+                    <MenuItem value='Bar' >Bar</MenuItem>
+                    <MenuItem value='Tienda' >Tienda</MenuItem>
+                    <MenuItem value='Paisaje' >Paisaje</MenuItem>
+                    <MenuItem value='Monumento' >Monumento</MenuItem>
+                </Select>
+                <FormLabel id="score-label">Proporciona una valoración al punto entre 0 y 10</FormLabel>
+                <input max={10} min={0} type="number" value={score} onChange={(e) => { setScore(Number(e.target.value)) }}></input>
                 <TextField
                     label="Comentario"
                     value={comment}
@@ -133,15 +148,15 @@ function AddPointForm(): JSX.Element {
             <FormGroup>
                 {friends.map(friend => {
                     return (<><label key={uuidv4()} htmlFor="checkbox">{friend.name}</label>
-                    <input key={uuidv4()}
-                    type="checkbox"
-                    onChange={ (e) => {handleCheckBoxChange(e, friend)}}
-                    id="checkbox"
-                    /></>);
+                        <input key={uuidv4()}
+                            type="checkbox"
+                            onChange={(e) => { handleCheckBoxChange(e, friend) }}
+                            id="checkbox"
+                        /></>);
 
                 })}
             </FormGroup>
-            <button onClick={(e) => { handleSubmit(e); }}>Agregar punto</button>
+            <Button onClick={(e) => { handleSubmit(e); }} variant='contained' color='primary'>Agregar punto</Button>
             <>{msg}</>
             <MapContainer id="mapContainer" center={[
                 latP,
