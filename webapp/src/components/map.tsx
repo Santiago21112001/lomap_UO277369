@@ -16,7 +16,7 @@ function Map(): JSX.Element {
   const position: LatLngExpression = [50.85119149087381, 4.3544687591272835];
   const [points, setPoints] = useState<PointMarker[]>([]);
   const [allPoints, setAllPoints] = useState<PointMarker[]>([]);
-  const [cat, setCat] = useState<string>('Sin categoría');
+  const [cat, setCat] = useState<string>('Sin filtro');
   const [selectedOptionFriend, setSelectedOptionFriend] = useState<number>(1);
 
   useEffect(() => {
@@ -63,38 +63,38 @@ function Map(): JSX.Element {
 
   return (
     <>
-      
-        <InputLabel id="select-filter-category-label">Filtrar en base a categoría</InputLabel>
-        <Select
-          labelId="select-filter-category-label"
-          value={cat}
-          onChange={(e) => {
-            setCat(e.target.value);
-          }}
-        >
-          <MenuItem value='Sin categoría' >Sin categoría</MenuItem>
-          <MenuItem value="Restaurante" >Restaurante</MenuItem>
-          <MenuItem value='Bar' >Bar</MenuItem>
-          <MenuItem value='Tienda' >Tienda</MenuItem>
-          <MenuItem value='Paisaje' >Paisaje</MenuItem>
-          <MenuItem value='Monumento' >Monumento</MenuItem>
-          <MenuItem value='Sin filtro' >Sin filtro</MenuItem>
-        </Select>
-        <Button onClick={(e) => { e.preventDefault(); filter(); }} variant='contained' color='primary'>Filtrar</Button>
-        <InputLabel id="label">Filtrar en base a propietario</InputLabel>
-        <Select
-          labelId="label"
-          value={selectedOptionFriend}
-          onChange={(e) => {
-            setSelectedOptionFriend(Number(e.target.value));
-          }}
-        >
-          <MenuItem value={1} >Tus puntos y los de tus amigos</MenuItem>
-          <MenuItem value={2} >Sólo tus puntos</MenuItem>
-          <MenuItem value={3} >Sólo los de tus amigos</MenuItem>
-        </Select>
-        <Button onClick={(e) => { e.preventDefault(); filterByOwner(); }} variant='contained' color='primary'>Filtrar</Button>
-      
+
+      <InputLabel id="select-filter-category-label">Filtrar en base a categoría</InputLabel>
+      <Select
+        labelId="select-filter-category-label"
+        value={cat}
+        onChange={(e) => {
+          setCat(e.target.value);
+        }}
+      >
+        <MenuItem value='Sin filtro' >Sin filtro</MenuItem>      
+        <MenuItem value="Restaurante" >Restaurante</MenuItem>
+        <MenuItem value='Bar' >Bar</MenuItem>
+        <MenuItem value='Tienda' >Tienda</MenuItem>
+        <MenuItem value='Paisaje' >Paisaje</MenuItem>
+        <MenuItem value='Monumento' >Monumento</MenuItem>
+        <MenuItem value='Sin categoría' >Sin categoría</MenuItem>
+      </Select>
+      <Button onClick={(e) => { e.preventDefault(); filter(); }} variant='contained' color='primary'>Filtrar</Button>
+      <InputLabel id="label">Filtrar en base a propietario</InputLabel>
+      <Select
+        labelId="label"
+        value={selectedOptionFriend}
+        onChange={(e) => {
+          setSelectedOptionFriend(Number(e.target.value));
+        }}
+      >
+        <MenuItem value={1} >Tus puntos y los de tus amigos</MenuItem>
+        <MenuItem value={2} >Sólo tus puntos</MenuItem>
+        <MenuItem value={3} >Sólo los de tus amigos</MenuItem>
+      </Select>
+      <Button onClick={(e) => { e.preventDefault(); filterByOwner(); }} variant='contained' color='primary'>Filtrar</Button>
+
       <MapContainer id="mapContainer" center={position} zoom={13} scrollWheelZoom={false}>
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -103,11 +103,11 @@ function Map(): JSX.Element {
         {points.map((point: PointMarker) => {
           return (
             <Marker
-            icon={icon({
-              iconUrl: pointMarkerIcon,
-              iconSize: [50, 50],
-              iconAnchor: [50, 50],
-            })}
+              icon={icon({
+                iconUrl: pointMarkerIcon,
+                iconSize: [50, 50],
+                iconAnchor: [50, 50],
+              })}
               key={point.id}
               position={[
                 point.lat,

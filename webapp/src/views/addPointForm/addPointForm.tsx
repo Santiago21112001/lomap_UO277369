@@ -1,5 +1,5 @@
 import { useSession } from "@inrupt/solid-ui-react";
-import { Box, Button, FormControl, FormControlLabel, FormGroup, FormLabel, InputLabel, MenuItem, Radio, RadioGroup, Select, TextField } from "@mui/material";
+import { Alert, Box, Button, FormControl, FormControlLabel, FormGroup, FormLabel, InputLabel, MenuItem, Radio, RadioGroup, Select, TextField } from "@mui/material";
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from 'uuid';
 import { addUserPoint } from "../../logic/podManager";
@@ -95,6 +95,7 @@ function AddPointForm(): JSX.Element {
             </nav>
             <Box component="h1">Añadir punto</Box>
             <Box component="h2">Introduce los datos y luego arrastra el marcador del mapa para elegir la posición de tu nuevo punto</Box>
+            <Alert sx={{fontSize: 20}} severity="warning">Por favor, arrastre el marcador (presionar y soltar el ratón sobre él) al menos 2 veces para confirmar las coordenadas de tu nuevo punto.</Alert>
                 <TextField
                     required
                     label="Name"
@@ -145,7 +146,7 @@ function AddPointForm(): JSX.Element {
             </FormControl>
             <p>Amigos con los que compartir tu punto</p>
 
-            <FormGroup>
+            <FormGroup row>
                 {friends.map(friend => {
                     return (<><label key={uuidv4()} htmlFor="checkbox">{friend.name}</label>
                         <input key={uuidv4()}
